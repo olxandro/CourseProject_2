@@ -4,7 +4,7 @@ public enum Repeatable {
 
     DAILY("ежедневная"),
     WEEKLY("еженедельная"),
-    MOUNHLY("ежемесячная"),
+    MONHLY("ежемесячная"),
     YEARLY("ежедневно"),
     ONCE("ежегодная"),
 
@@ -21,11 +21,15 @@ public enum Repeatable {
                 return createTimeDate.plusDays(1);
             case WEEKLY:
                 return createTimeDate.plusWeeks(1);
-            case MOUNHLY:
+            case MONHLY:
                 return createTimeDate.plusMonths(1);
             case YEARLY:
                 return createTimeDate.plusYears(1);
         }
         return null;
+    }
+
+    public String getMessage() {
+        return message;
     }
 }

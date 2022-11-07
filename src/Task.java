@@ -1,4 +1,6 @@
 import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
+import java.util.Objects;
 
 public class Task {
 
@@ -49,18 +51,19 @@ public class Task {
         this.createTimeDate = LocalDate.now();
         this.id = counter + 1;
         this.repeatable = Repeatable.ONCE;
+        System.out.println("Задача " + getName() + " создана!");
     }
 
     public Task(String name, String description, TypeTasks type) throws NoTypeException, NoNameException, NoDescException {
         new Task(name, type);
-        if (description != null && !description.isEmpty() && description.isBlank()) {
+        if (description != null && !description.isEmpty() && !description.isBlank()) {
             this.description = description;
         } else {
             throw new NoDescException("Отсутствует описание задачи!");
         }
     }
 
-    public Task(String name, String description, TypeTasks type, LocalDate createTimeDate, Repeatable repeatable, int id) throws NoDescException, NoTypeException, NoNameException, NoRepeatException {
+    public Task(String name, String description, TypeTasks type, Repeatable repeatable) throws NoDescException, NoTypeException, NoNameException, NoRepeatException {
         new Task(name, description, type);
         if (repeatable != null) {
             this.repeatable = repeatable;
@@ -71,5 +74,32 @@ public class Task {
 
     public LocalDate getNextTime() {
         return repeatable.getNextTime(createTimeDate);
+    }
+
+    @Override
+    public String toString() {
+        return "Задача:" +
+                "заголовок - " + name +
+                ", описание - " + description +
+                ", тип - " + type +
+                ", дата создания - " + DateTimeFormatter.ofPattern("dd/MM/yyyy").format(createTimeDate) +
+                ", вид повторения - " + repeatable +
+                ", id - " + id;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Task task = (Task) o;
+        return id == task.id && Objects.equals(name, task.name) &&
+                Objects.equals(description, task.description) &&
+                type == task.type && Objects.equals(createTimeDate, task.createTimeDate) &&
+                repeatable == task.repeatable;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(name, description, type, createTimeDate, repeatable, id);
     }
 }
