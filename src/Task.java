@@ -1,4 +1,5 @@
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Objects;
 
@@ -7,7 +8,7 @@ public class Task {
     private String name;
     private String description;
     private TypeTasks type;
-    private LocalDate createTimeDate;
+    private LocalDateTime createTimeDate;
     private Repeatable repeatable;
     private int id;
     private static int counter;
@@ -24,7 +25,7 @@ public class Task {
         return type;
     }
 
-    public LocalDate getCreateTimeDate() {
+    public LocalDateTime getCreateTimeDate() {
         return createTimeDate;
     }
 
@@ -48,7 +49,7 @@ public class Task {
         } else {
             throw new NoTypeException("Не указан тип задачи!");
         }
-        this.createTimeDate = LocalDate.now();
+        this.createTimeDate = LocalDate.now().atStartOfDay();
         this.id = counter + 1;
         this.repeatable = Repeatable.ONCE;
         System.out.println("Задача " + getName() + " создана!");
@@ -63,17 +64,18 @@ public class Task {
         }
     }
 
-    public Task(String name, String description, TypeTasks type, Repeatable repeatable) throws NoDescException, NoTypeException, NoNameException, NoRepeatException {
+    public Task(String name, String description, TypeTasks type, Repeatable repeatable, LocalDateTime createDateTime) throws NoDescException, NoTypeException, NoNameException, NoRepeatException {
         new Task(name, description, type);
         if (repeatable != null) {
             this.repeatable = repeatable;
         } else {
             throw new NoRepeatException("Отсутствует признак повторяемости задачи!");
         }
+        this.createTimeDate = createDateTime;
     }
 
     public LocalDate getNextTime() {
-        return repeatable.getNextTime(createTimeDate);
+        return repeatable.getNextTime(LocalDate.from(createTimeDate));
     }
 
     @Override

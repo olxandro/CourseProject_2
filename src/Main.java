@@ -1,4 +1,6 @@
 import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 import java.util.List;
@@ -43,15 +45,23 @@ public class Main {
     }
 
     private static void inputTask(Scanner scanner) {
+        scanner.nextLine();
         System.out.println("Введите название задачи: ");
-        String taskName = scanner.next();
+        String taskName = scanner.nextLine();
         System.out.println("Введите описание задачи: ");
-        String taskDescribe = scanner.next();
+        String taskDescribe = scanner.nextLine();
+        System.out.println("Введите дату задачи в формате dd/mm/yyyy: ");
+        String date = scanner.nextLine();
+        LocalDate taskDate = LocalDate.parse(date, DateTimeFormatter.ofPattern("dd/MM/yyyy"));
+        System.out.println("Введите время задачи в формате HH:mm: ");
+        String time = scanner.nextLine();
+        LocalTime taskTime = LocalTime.parse(time, DateTimeFormatter.ofPattern("HH:mm"));
+        LocalDateTime taskDateTime = LocalDateTime.of(taskDate, taskTime);
         TypeTasks typeTasks = getTypeOfTask(scanner);
         Repeatable repeatable = getRepeatable(scanner);
         try {
             Dairy dairy = new Dairy();
-            dairy.addTask(new Task(taskName, taskDescribe, typeTasks, repeatable));
+            dairy.addTask(new Task(taskName, taskDescribe, typeTasks, repeatable, taskDateTime));
         } catch (NoNameException | NoDescException | NoTypeException | NoRepeatException | NoTaskException e) {
             System.out.println(e);
         }
@@ -97,7 +107,7 @@ public class Main {
                     case 2:
                         return Repeatable.WEEKLY;
                     case 3:
-                        return Repeatable.MONHLY;
+                        return Repeatable.MONTHLY;
                     case 4:
                         return Repeatable.YEARLY;
                     default:
@@ -107,22 +117,24 @@ public class Main {
                 System.out.println("Введено не число. Повторите попытку!");
             }
         }
+
     }
 
     private static void getTaskOnDay(Scanner scanner) {
         while (true) {
+            scanner.nextLine();
             System.out.println("Введите дату в формате dd/mm/yyyy : ");
             Dairy dairy = new Dairy();
             DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
             String dateS = scanner.nextLine();
-            LocalDate dateL = null;
+            LocalDate date;
             try {
-                dateL = LocalDate.parse(dateS, formatter);
+                date = LocalDate.parse(dateS, formatter);
             } catch (DateTimeParseException e) {
                 System.out.println("Неверный формат ввода даты.");
                 continue;
             }
-            List<Task> taskOnDate = dairy.getTasksOnDate(dateL);
+            List<Task> taskOnDate = dairy.getTasksOnDate(date);
             for (Task task : taskOnDate) {
                 System.out.println(task);
             }

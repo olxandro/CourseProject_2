@@ -17,11 +17,17 @@ public class Dairy {
     public List<Task> getTasksOnDate(LocalDate date) {
         List<Task> taskList = new ArrayList<>();
         for (Map.Entry<Integer, Task> task : dairy.entrySet()) {
-            LocalDate localDate = task.getValue().getCreateTimeDate();
-            if (localDate.getDayOfWeek().getValue() == date.getDayOfWeek().getValue() ||
-                    localDate.getDayOfMonth() == date.getDayOfMonth() ||
-                    localDate.getDayOfYear() == date.getDayOfYear() ||
-                    task.getValue().getRepeatable().equals(Repeatable.DAILY)) {
+            LocalDate localDate = task.getValue().getCreateTimeDate().toLocalDate();
+            while (!localDate.isAfter(date)) {
+                if (localDate.equals(date)) {
+                    taskList.add(task.getValue());
+                }
+                task.getNextTime(); //хочу применить метод поиска следующей даты, но не понимаю как это сделать(запуталась совсем)
+            }
+            if (task.getValue().getRepeatable().equals(Repeatable.DAILY) ||
+                    (localDate.getDayOfWeek().getValue() == date.getDayOfWeek().getValue() &&
+                    localDate.getDayOfMonth() == date.getDayOfMonth() &&
+                    localDate.getDayOfYear() == date.getDayOfYear())) {
                 taskList.add(task.getValue());
             }
         }
