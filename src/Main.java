@@ -28,7 +28,22 @@ public class Main {
                         getTasksOnDay(sc);
                         break;
                     case 4:
+                        getDeletedTasks();
+                        break;
+                    case 5:
                         printAllTasks();
+                        break;
+                    case 6:
+                        setTaskName(sc);
+                        break;
+                    case 7:
+                        setTaskDescription(sc);
+                        break;
+                    case 8:
+                        getGroupedTasks(sc);
+                        break;
+                    case 9:
+                        inputTaskNewDate(sc);
                         break;
                     case 0:
                         System.exit(0);
@@ -46,16 +61,39 @@ public class Main {
                 "1. Добавить задачу,\n" +
                         "2. Удалить задачу,\n" +
                         "3. Получить задачи на указанный день,\n" +
-                        "4. Распечатать список всех задач,\n" +
+                        "4. Получить список удаленных задач,\n" +
+                        "5. Распечатать список всех задач,\n" +
+                        "6. Внести изменения в заголовок задачи,\n" +
+                        "7. Внести изменение в описание задачи,\n" +
+                        "8. Получить задачи сгруппированные по дням за определенный период\n" +
+                        "9. Добавить задачу с датой начала, отличной от текущей\n" +
                         "0. Выход."
         );
     }
 
     /**
-     * метод добавления задачи
+     * метод добавления задач
      * @param scanner - вводимые данные
      */
-    private static void inputTask (Scanner scanner) {
+    private static void inputTask(Scanner scanner) {
+        scanner.nextLine();
+        System.out.println("Введите название задачи: ");
+        String taskName = scanner.nextLine();
+        System.out.println("Введите описание задачи: ");
+        String taskDescribe = scanner.nextLine();
+        TypeOfTask type = getTypeOfTask(scanner);
+        Repeatable repeatable = getRepeatable(scanner);
+        try {
+            Task task = new Task(taskName, taskDescribe, type, repeatable);
+            dairy.addTask(task);
+            System.out.println("Задача добавлена!");
+            System.out.println(Dairy.getDairy().size());
+        } catch (NoNameException | NoTypeException | NoDescException | NoRepeatException | NoTaskException e) {
+            System.out.println(e.getMessage() + e.getStackTrace());
+        }
+
+    }
+    private static void inputTaskNewDate (Scanner scanner) {
         scanner.nextLine();
         System.out.println("Введите название задачи:");
         String taskName = scanner.nextLine();
@@ -68,7 +106,8 @@ public class Main {
         try {
             Task task = new Task(taskName, taskDescribe, type, repeatable, date);
             dairy.addTask(task);
-            System.out.println("Задача добавлена в ежедневник!");
+            System.out.println("Задача добавлена!");
+            System.out.println(Dairy.getDairy().size());
         } catch (NoNameException | NoTypeException | NoDescException | NoRepeatException | NoTaskException e) {
             System.out.println(e.getMessage() + Arrays.toString(e.getStackTrace()));
         }
@@ -135,6 +174,16 @@ public class Main {
     }
 
     /**
+     * получение списка удаленных задач
+     */
+    private static void getDeletedTasks() {
+        HashMap<Integer, Task> deletedTasks = Dairy.getDeletedTasks();
+        for (Map.Entry<Integer, Task> task : deletedTasks.entrySet()) {
+            System.out.println(task.getValue());
+        }
+    }
+
+    /**
      * метод распечатки всех задач
      */
     private static void printAllTasks() {
@@ -146,16 +195,69 @@ public class Main {
     }
 
     /**
-     * метод удаления задачи по id
-     * @param scanner - вводимые данные
+     * метод для смены заголовка задачи
+     * @param scanner - вводимая строка в консоли
      */
-    private static void deleteTask(Scanner scanner) {
+    private static void setTaskName(Scanner scanner) {
+        int id;
+        while (true) {
+            System.out.println("Введите id задачи для изменения её заголовка: ");
+            if (scanner.hasNextInt()) {
+                id = scanner.nextInt();
+                if (Dairy.isTaskExist(id)) {
+                    System.out.println("Введите новый заголовок задачи:");
+                    dairy.setTaskName(id, scanner.nextLine());
+                    break;
+                } else {
+                    System.out.println("Задачи с таким id не существует, уточните id");
+                }
+            } else {
+                System.out.println("Введено не число, попробуйте еще раз!");
+            }
+        }
+        System.out.println("Введите новый заголовок задания: ");
+        dairy.setTaskName(id, scanner.nextLine());
+    }
+    private static void setTaskDescription(Scanner scanner) {
+        int id;
+        while (true) {
+            System.out.println("Введите id задачи для изменения её заголовка: ");
+            if (scanner.hasNextInt()) {
+                id = scanner.nextInt();
+                if (Dairy.isTaskExist(id)) {
+                    System.out.println("Введите новое описание задания: ");
+                    dairy.setTaskDescription(id, scanner.nextLine());
+                    break;
+                } else {
+                    System.out.println("Задачи с таким id не существует, уточните id");
+                }
+            } else {
+                System.out.println("Введено не число, попробуйте еще раз!");
+            }
+        }
+        dairy.setTaskDescription(id, scanner.nextLine());
+    }
+    private static void getGroupedTasks(Scanner scanner) {
+        LocalDate date = getDate(scanner);
+        Map<LocalDate, List<Task>> groupedTasks = dairy.getGroupedTasks(date);//получили список задач, сгруппированный по дням, можно сделать любой отрезов времени в принципе
+        for (Map.Entry<LocalDate, List<Task>> entry :
+                groupedTasks.entrySet()) {
+            LocalDate currentDate = entry.getKey();
+            System.out.println("на дату " + currentDate.getDayOfMonth() + "." + currentDate.getMonthValue() +
+                    "." + currentDate.getYear() + ":");
+            for (Task t :
+                    entry.getValue()) {
+                System.out.println(t);
+            }
+        }
+    }
+    private static void deleteTask(Scanner sc) {
         while (true) {
             System.out.println("Введите ID задачи для удаления: \n" +
                     "0. выйти в предыдущее меню");
             int taskID;
             try {
-                taskID = scanner.nextInt();
+                taskID = sc.nextInt();
                 if (taskID == 0) {
                     break;
                 }
@@ -171,16 +273,13 @@ public class Main {
         }
     }
 
-    /**
-     * Метод ввода даты для задачи
-     * @param scanner - ввод строки в формате даты
-     * @return возвращает распарсенную дату
-     */
     private static LocalDate getDate(Scanner scanner) {
         while (true) {
             try {
-                System.out.println("введите дату в формате dd/mm/yyyy:");
-                DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
+                System.out.println("введите дату в формате DD-MM-YYYY:");
+
+                DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd-MM-yyyy");
+
                 return LocalDate.parse(scanner.next(), formatter);
             } catch (Exception e) {
                 System.out.println("Неверный формат ввода");
